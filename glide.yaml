@@ -1,0 +1,24 @@
+package: github.com/asteris-llc/pony
+ignore:
+- golang.org/x/net/context
+import:
+- package: github.com/hashicorp/go-getter
+- package: github.com/hashicorp/go-plugin
+- package: github.com/packer-community/winrmcp
+  version: 3d184cea22ee1c41ec1697e0d830ff0c78f7ea97
+- package: github.com/masterzen/winrm
+  version: 54ea5d01478cfc2afccec1504bd0dfcd8c260cfa
+- package: github.com/hashicorp/terraform
+  version: v0.7.0
+- package: github.com/hashicorp/hil
+  version: 1e86c6b523c55d1fa6c6e930ce80b548664c95c2
+- package: github.com/mitchellh/cli
+- package: github.com/mitchellh/go-homedir
+- package: github.com/mitchellh/osext
+- package: github.com/sirupsen/logrus
+- package: github.com/spf13/cobra
+- package: golang.org/x/crypto
+  subpackages:
+  - ssh
+- package: github.com/aws/aws-sdk-go
+  version: v1.2.7
