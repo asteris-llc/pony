@@ -1,72 +1,44 @@
 package tf
 
 var google_template = `
-module "test" {
-	source = "github.com/CiscoCloud/mantl/terraform/gce/network"
+module "gce" { source = "github.com/ChrisAubuchon/pony-config/gce/base" }
+`
+
+var not_used = `
+variable credentials {
+  description = "Path to the JSON file for GCE credentials"
+  default = "account.json"
+}
+variable project {
+  description = "The ID of the project to apply any resources to"
+}
+variable region {
+  description = "The GCE region to operate under"
+}
+variable short_name {
+  default = "mantl"
+  description = "Prefix for created resources"
 }
 
 variable "meta_required_variables" {
   type = "list"
 
   default = [
-    "short_name"
+    "credentials",
+    "project",
+    "region",
+    "short_name",
   ]
 }
-	
-variable "long_name" {default = "mantl"}
-variable "network_ipv4" {default = "10.0.0.0/16"}
-variable "short_name" {
-  default = "mantl"
-  description = "Prefix for created resources"
+
+provider "google" {
+  credentials = "${file(var.credentials)}"
+  project = "${var.project}"
+  region = "${var.region}"
 }
 
-# Network
-resource "google_compute_network" "mantl-network" {
-  name = "${var.long_name}"
-  ipv4_range = "${var.network_ipv4}"
-}
-
-# Firewall
-resource "google_compute_firewall" "mantl-firewall-external" {
-  name = "${var.short_name}-firewall-external"
-  network = "${google_compute_network.mantl-network.name}"
-  source_ranges = ["0.0.0.0/0"]
-
-  allow {
-    protocol = "icmp"
-  }
-
-  allow {
-    protocol = "tcp"
-    ports = [
-      "22",   # SSH
-      "80",   # HTTP
-      "443",  # HTTPS
-      "4400", # Chronos
-      "5050", # Mesos
-      "8080", # Marathon
-      "8500"  # Consul API
-    ]
-  }
-}
-
-resource "google_compute_firewall" "mantl-firewall-internal" {
-  name = "${var.short_name}-firewall-internal"
-  network = "${google_compute_network.mantl-network.name}"
-  source_ranges = ["${google_compute_network.mantl-network.ipv4_range}"]
-
-  allow {
-    protocol = "tcp"
-    ports = ["1-65535"]
-  }
-
-  allow {
-    protocol = "udp"
-    ports = ["1-65535"]
-  }
-
-  allow {
-    protocol = "4"
-  }
+module "gce-network" {
+  description = "Google network"
+  source = "github.com/ChrisAubuchon/pony-config/gce/network"
 }
 `

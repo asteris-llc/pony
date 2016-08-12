@@ -1,6 +1,11 @@
 hash: e6d02db6bbe78c704ada6188fc129cd5d50d99a47fa9947dcd4546ef4594e463
-updated: 2016-08-05T12:23:30.271429842-05:00
+updated: 2016-08-11T14:07:34.973865804-05:00
 imports:
+- name: cloud.google.com/go
+  version: c121838027cfe55557aee83e768f09c83eb172fc
+  subpackages:
+  - compute/metadata
+  - internal
 - name: github.com/apparentlymart/go-cidr
   version: a3ebdb999b831ecb6ab8a226e31b07b2b9061c47
   subpackages:
@@ -15,9 +20,47 @@ imports:
   - aws/session
   - service/s3
   - aws/awserr
+  - aws/request
+  - service/apigateway
+  - service/applicationautoscaling
+  - service/autoscaling
+  - service/cloudformation
+  - service/cloudfront
+  - service/cloudtrail
+  - service/cloudwatch
+  - service/cloudwatchevents
+  - service/cloudwatchlogs
+  - service/codecommit
+  - service/codedeploy
+  - service/directoryservice
+  - service/dynamodb
+  - service/ec2
+  - service/ecr
+  - service/ecs
+  - service/efs
+  - service/elasticache
+  - service/elasticbeanstalk
+  - service/elasticsearchservice
+  - service/elastictranscoder
+  - service/elb
+  - service/emr
+  - service/firehose
+  - service/glacier
+  - service/iam
+  - service/kinesis
+  - service/kms
+  - service/lambda
+  - service/opsworks
+  - service/rds
+  - service/redshift
+  - service/route53
+  - service/ses
+  - service/simpledb
+  - service/sns
+  - service/sqs
+  - service/sts
   - aws/client
   - aws/client/metadata
-  - aws/request
   - aws/corehandlers
   - aws/defaults
   - private/endpoints
@@ -26,17 +69,36 @@ imports:
   - private/protocol
   - private/protocol/restxml
   - private/waiter
+  - private/protocol/restjson
+  - private/protocol/jsonrpc
+  - private/protocol/query
+  - private/protocol/ec2query
+  - private/signer/v2
   - aws/credentials/endpointcreds
   - private/protocol/rest
-  - private/protocol/query
   - private/protocol/xml/xmlutil
+  - private/protocol/json/jsonutil
   - private/protocol/query/queryutil
+- name: github.com/davecgh/go-spew
+  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  subpackages:
+  - spew
 - name: github.com/deiwin/interact
   version: 720596b65af849cd820b6f6acaaf94cfe65516e4
+- name: github.com/dylanmei/iso8601
+  version: 2075bf119b58e5576c6ed9f867b8f3d17f2e54d4
+- name: github.com/dylanmei/winrmtest
+  version: 025617847eb2cf9bd1d851bc3b22ed28e6245ce5
 - name: github.com/go-ini/ini
   version: cf53f9204df4fbdd7ec4164b57fa6184ba168292
+- name: github.com/golang/protobuf
+  version: 2c1988e8c18d14b142c0b472624f71647cf39adb
+  subpackages:
+  - proto
 - name: github.com/hashicorp/errwrap
   version: 7554cd9344cec97297fa6649b055a8c98c2a1e55
+- name: github.com/hashicorp/go-cleanhttp
+  version: ad28ea4487f05916463e2423a55166280e8254b5
 - name: github.com/hashicorp/go-getter
   version: 3d6040e1c4b972f6634c5aafb08901f916c5ee3c
   subpackages:
@@ -64,42 +126,136 @@ imports:
   version: 1e86c6b523c55d1fa6c6e930ce80b548664c95c2
   subpackages:
   - ast
+- name: github.com/hashicorp/logutils
+  version: 0dc08b1671f34c4250ce212759ebd880f743d883
 - name: github.com/hashicorp/terraform
   version: e822a79165dbc06bbf8271ee349fe256867d53dc
   subpackages:
+  - builtin/providers/google
+  - builtin/provisioners/remote-exec
   - config
   - config/module
+  - plugin
   - terraform
+  - builtin/providers/aws
+  - builtin/providers/null
+  - builtin/providers/template
+  - helper/hashcode
+  - helper/pathorcontents
+  - helper/resource
+  - helper/schema
+  - communicator
+  - communicator/remote
   - helper/hilmapstructure
   - dag
   - dot
   - flatmap
+  - helper/logging
+  - helper/mutexkv
+  - helper/config
+  - communicator/ssh
+  - communicator/winrm
+- name: github.com/hashicorp/yamux
+  version: d1caa6c97c9fc1cc9e83bbe34d0603f9ff0ce8bd
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/jmespath/go-jmespath
   version: bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d
+- name: github.com/masterzen/simplexml
+  version: 4572e39b1ab9fe03ee513ce6fc7e289e98482190
+  subpackages:
+  - dom
 - name: github.com/masterzen/winrm
   version: 54ea5d01478cfc2afccec1504bd0dfcd8c260cfa
+  subpackages:
+  - winrm
+  - soap
+- name: github.com/masterzen/xmlpath
+  version: 13f4951698adc0fa9c1dda3e275d489a24201161
 - name: github.com/mitchellh/cli
   version: 168daae10d6ff81b8b1201b0a4c9607d7e9b82e3
 - name: github.com/mitchellh/copystructure
   version: cdac8253d00f2ecf0a0b19fbff173a9a72de4f82
 - name: github.com/mitchellh/go-homedir
   version: 756f7b183b7ab78acdbbee5c7f392838ed459dda
+- name: github.com/mitchellh/go-linereader
+  version: 07bab5fdd9580500aea6ada0e09df4aa28e68abd
 - name: github.com/mitchellh/mapstructure
   version: 21a35fb16463dfb7c8eee579c65d995d95e64d1e
 - name: github.com/mitchellh/osext
   version: 5e2d6d41470f99c881826dedd8c526728b783c9c
+- name: github.com/mitchellh/packer
+  version: 3ab7db6168b4ac1c5d008f3d565b07c3201bab83
+  subpackages:
+  - common/uuid
 - name: github.com/mitchellh/reflectwalk
   version: eecf4c70c626c7cfbb95c90195bc34d386c74ac6
+- name: github.com/nu7hatch/gouuid
+  version: 179d4d0c4d8d407a32af483c2354df1d2c91e6c3
 - name: github.com/packer-community/winrmcp
   version: 3d184cea22ee1c41ec1697e0d830ff0c78f7ea97
+  subpackages:
+  - winrmcp
 - name: github.com/satori/go.uuid
   version: 0aa62d5ddceb50dbcb909d790b5345affd3669b6
 - name: github.com/sirupsen/logrus
   version: a283a10442df8dc09befd873fab202bf8a253d6a
 - name: github.com/spf13/cobra
   version: 7c674d9e72017ed25f6d2b5e497a1368086b6a6f
+- name: github.com/spf13/pflag
+  version: f676131e2660dc8cd88de99f7486d34aa8172635
+- name: github.com/sthulb/mime
+  version: 698462dc9685d7743511c26da726c1b0c1cfb111
+  subpackages:
+  - multipart
+- name: github.com/xanzy/ssh-agent
+  version: ba9c9e33906f58169366275e3450db66139a31a9
 - name: golang.org/x/crypto
   version: e0d166c33c321d0ff863f459a5882096e334f508
   subpackages:
   - ssh
+  - ssh/agent
+  - curve25519
+  - ed25519
+  - ed25519/internal/edwards25519
+- name: golang.org/x/net
+  version: 075e191f18186a8ff2becaf64478e30f4545cdad
+  subpackages:
+  - context
+  - context/ctxhttp
+- name: golang.org/x/oauth2
+  version: 4784bb855e56a530f1ce5d788959359ed6cb4a16
+  subpackages:
+  - google
+  - jwt
+  - internal
+  - jws
+- name: golang.org/x/sys
+  version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
+  subpackages:
+  - unix
+- name: google.golang.org/api
+  version: 8ae9b02432fd8417fb9359af58f473036b094d20
+  subpackages:
+  - compute/v1
+  - container/v1
+  - dns/v1
+  - googleapi
+  - pubsub/v1
+  - sqladmin/v1beta4
+  - storage/v1
+  - gensupport
+  - googleapi/internal/uritemplates
+- name: google.golang.org/appengine
+  version: e951d3868b377b14f4e60efa3a301532ee3c1ebf
+  subpackages:
+  - urlfetch
+  - internal
+  - internal/urlfetch
+  - internal/app_identity
+  - internal/modules
+  - internal/base
+  - internal/datastore
+  - internal/log
+  - internal/remote_api
 devImports: []

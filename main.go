@@ -1,26 +1,28 @@
 package main
 
 import (
-	"github.com/asteris-llc/pony/tf"
-	log "github.com/sirupsen/logrus"
+	"github.com/asteris-llc/pony/commands"
 )
 
 func main() {
-	tf := tf.New()
+	root := commands.Init()
+	root.Execute()
+		
+}
 
-	log.SetLevel(log.DebugLevel)
-
-	if err := tf.SelectCloud(); err != nil {
-		log.Fatal(err)
+/*
+	if err := tf.Context(); err != nil {
+		fatal(tf, err)
 	}
 
-	if err := tf.LoadCloud(); err != nil {
-		log.Fatal(err)
+	if err := tf.Plan(); err != nil {
+		fatal(tf, err)
 	}
 
-	if err := tf.ReadVariables(); err != nil {
-		log.Fatal(err)
+	if err := tf.Apply(); err != nil {
+		fatal(tf, err)
 	}
 
 	log.Println(tf)
 }
+*/

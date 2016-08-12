@@ -2,33 +2,231 @@ package tf
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
+	"io/ioutil"
+	golog "log"
 	"os"
-
-	"github.com/hashicorp/terraform/config"
-	"github.com/hashicorp/terraform/config/module"
-	"github.com/hashicorp/terraform/terraform"
+	"sort"
+	"strings"
 
 	"github.com/asteris-llc/pony/cli"
+	"github.com/asteris-llc/pony/tf/plugin"
+
+	"github.com/hashicorp/terraform/config/module"
+	"github.com/hashicorp/terraform/terraform"
+	tfcli "github.com/mitchellh/cli"
+
+	log "github.com/sirupsen/logrus"
+
+)
+
+const (
+	StatePath = "terraform.tfstate"
 )
 
 type Tf struct {
-	ctx	*terraform.Context
-	m	*module.Tree
-	config	*config.Config
+	context	*terraform.Context
+	tree	*module.Tree
 	cli	*cli.Cli
 	cloud	string
+	tempDir string
+        globals *variables
+	state	*terraform.State
 }
 
 func New() *Tf {
-	return &Tf{
-		cli: cli.New(os.Stdin, os.Stdout),
+	tf := new(Tf)
+
+	tf.cli = cli.New(os.Stdin, os.Stdout)
+
+	tdir, err := ioutil.TempDir("", "pony")
+	if err != nil {
+		log.Fatal(err)
 	}
+
+	if err := os.RemoveAll(tdir); err != nil {
+		log.Fatal(err)
+	}
+	tf.tempDir = tdir
+
+	tf.globals = newVariables()
+
+	return tf
 }
 
-func (t *Tf) String() string {
+func (tf *Tf) Run() error {
+	if err := tf.LoadCloud(); err != nil {
+		return err
+	}
+
+	if err := tf.ReadVariables(); err != nil {
+		return err
+	}
+
+	if err := tf.Context(); err != nil {
+		return err
+	}
+
+//	tf.dumpVariables(tf.tree)
+
+	if err := tf.Plan(); err != nil {
+		return err
+	}
+
+	if err := tf.Apply(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (tf *Tf) String() string {
 	rval := bytes.NewBufferString("Tf structure:\n")
-	rval.WriteString(fmt.Sprintf("  Cloud Provider: %s\n", t.cloud))
+	rval.WriteString(fmt.Sprintf("  Cloud Provider: %s\n", tf.cloud))
 
 	return rval.String()
+}
+
+func (tf *Tf) Clean() {
+	log.Debugf("Running clean()")
+	os.RemoveAll(tf.tempDir)
+	os.Remove(tf.tempDir)
+}
+
+func (tf *Tf) Context() error {
+	golog.SetOutput(ioutil.Discard)
+
+	providers, err := plugin.Providers()
+	if err != nil {
+		return err
+	}
+
+	provisioners, err := plugin.Provisioners()
+	if err != nil {
+		return err
+	}
+
+	ctx, err := terraform.NewContext(&terraform.ContextOpts{
+		Hooks:	[]terraform.Hook{NewUiHook(&tfcli.BasicUi{Writer: os.Stdout})},
+		Module: tf.tree,
+		Providers: providers,
+		Provisioners: provisioners,
+		State: nil,
+	})
+	if err != nil {
+		return err
+	}
+
+	tf.context = ctx
+
+	return nil
+}
+
+func (tf *Tf) Plan() error {
+	p, err := tf.context.Plan()
+	if err != nil {
+		return err
+	}
+
+	if false {
+		tf.formatPlan(p)
+	}
+
+	return nil
+}
+
+func (tf *Tf) Apply() error {
+	var s *terraform.State
+	var applyErr error
+
+        doneCh := make(chan struct{})
+        ShutdownCh := make(chan struct{})
+        go func() {
+                defer close(doneCh)
+                s, applyErr = tf.context.Apply()
+        }()
+
+        select {
+        case <-ShutdownCh:
+                go tf.context.Stop()
+        case <-doneCh:
+        }
+
+	tf.state = s
+
+	if err := tf.writeState(); err != nil {
+		return err
+	}
+
+        return applyErr
+}
+
+func (tf *Tf) writeState() error {
+	f, err := os.Create(StatePath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	data, err := json.MarshalIndent(tf.state, "", "  ")
+	if err != nil {
+		return err
+	}
+	data = append(data, '\n')
+
+	if _, err := io.Copy(f, bytes.NewReader(data)); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (tf *Tf) formatPlan(p *terraform.Plan) {
+        created := []string{}
+        destroyed := []string{}
+        updated := []string{}
+
+        for _, m := range p.Diff.Modules {
+                for r, _ := range m.Resources {
+                        name := extractResource(r)
+                        switch m.ChangeType() {
+                        case terraform.DiffCreate:
+                                created = append(created, name)
+                        case terraform.DiffDestroy:
+                                destroyed = append(destroyed, name)
+                        case terraform.DiffUpdate:
+                                updated = append(updated, name)
+                        }
+                }
+        }
+
+        fmt.Println("Resources Created:")
+        outputResources(created)
+
+        fmt.Println("\nResources Destroyed:")
+        outputResources(destroyed)
+
+        fmt.Println("\nResources Updated:")
+        outputResources(updated)
+
+        fmt.Printf("\n%+v\n", p)
+}
+
+func outputResources(s []string) {
+        if len(s) == 0 {
+                fmt.Println("  <none>")
+        } else {
+                sort.Strings(s)
+                for _, r := range s {
+                        fmt.Printf("  %s\n", r)
+                }
+        }
+}
+
+func extractResource(r string) string {
+        fields := strings.Split(r, ".")
+
+        return fields[len(fields)-1]
 }
