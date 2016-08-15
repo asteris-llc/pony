@@ -32,7 +32,7 @@ func Init() *Command {
 				return err
 			}
 
-			return c.tf.Run()
+			return c.tf.Create()
 		},
 	}
 	c.tf = tf.New()
@@ -40,6 +40,7 @@ func Init() *Command {
 	c.root.PersistentFlags().StringVarP(&c.logLevel, "log-level", "l", "warn", "Logging level")
 
 	plugin.InitPluginCmd(c.root)
+	c.addDestroySub()
 
 	return &c
 }

@@ -14,14 +14,12 @@ const (
 	_ = iota
 	MetaRequired = "meta_required_variables"
 	MetaIgnored = "meta_ignored_variables"
+	MetaDestroy = "meta_destroy_variables"
 
 	ModuleDescription = "description"
 )
 
-var metaHandlers = []func(*Tf, *variables) error{
-	metaRequiredHandler,
-	metaIgnoredHandler,
-}
+type metaHandler func(*Tf, *variables) error
 
 type variables map[string]*variable
 
@@ -57,13 +55,13 @@ func (vs *variables) delete(name string) {
 	delete(*vs, name)
 }
 
-func (tf *Tf) ReadVariables() error {
+func (tf *Tf) ReadVariables(mh []metaHandler) error {
 	vs := newVariables()
 	vs.readVars(tf.tree)
 
 	// Process the root configuration
 	//
-	if err := tf.processModule(tf.tree, vs, "Global Configuration"); err != nil {
+	if err := tf.processModule(tf.tree, vs, mh, "Global Configuration"); err != nil {
 		return err
 	}
 
@@ -73,7 +71,7 @@ func (tf *Tf) ReadVariables() error {
 	tf.globals.readVars(tf.tree)
 
 
-	if err := tf.processChildren(tf.tree); err != nil {
+	if err := tf.processChildren(tf.tree, mh); err != nil {
 		return err
 	}
 
@@ -81,28 +79,22 @@ func (tf *Tf) ReadVariables() error {
 }
 
 
-func (tf *Tf) processModule(tree *module.Tree, vs *variables, header string) error {
+func (tf *Tf) processModule(tree *module.Tree, vs *variables, mh []metaHandler, header string) error {
 	if header != "" {
 		fmt.Printf("\n%s\n\n", header)
 	}
 
 	// Run through all of the meta variable handlers
-	for _, mh := range metaHandlers {
-		if err := mh(tf, vs); err != nil {
+	for _, m := range mh {
+		if err := m(tf, vs); err != nil {
 			return err
 		}
-	}
-
-	// The remaining variables are optional. Run through them here
-	//
-	if err := optionalVariables(tf, vs); err != nil {
-		return err
 	}
 
 	return nil
 }
 
-func (tf *Tf) processChildren(root *module.Tree) error {
+func (tf *Tf) processChildren(root *module.Tree, mh []metaHandler) error {
 	children := root.Children()
 	for _, m := range root.Config().Modules {
 		if _, ok := children[m.Name]; !ok {
@@ -132,7 +124,7 @@ func (tf *Tf) processChildren(root *module.Tree) error {
 					
 			}
 		}
-		tf.processModule(child, vs, desc)
+		tf.processModule(child, vs, mh, desc)
 
 
 		// The RawConfig variables override the module variable's Default
@@ -151,114 +143,6 @@ func (tf *Tf) processChildren(root *module.Tree) error {
 
 	return nil
 }
-
-func optionalVariables(tf *Tf, vs *variables) error {
-	if len((*vs)) == 0 {
-		log.Debug("No optional variables in module")
-
-		// No more variables left
-		return nil
-	}
-
-	ask := true
-	if !tf.cli.AskYesNo("Configure optional parameters? (y/N)", "n") {
-		ask = false
-	}
-
-	for _, v := range *vs {
-		// Set global values
-		if globalValue := tf.globals.get(v.name); globalValue != nil {
-			log.Debugf("Setting global value for %s", v.name)
-			v.setValue(globalValue.v.Default)
-		}
-
-		if ask {
-			if err := askForValue(tf, vs, v.name); err != nil {
-				return err
-			}
-		}
-	}
-
-	return nil
-}
-
-func metaRequiredHandler(tf *Tf, vs *variables) error {
-	requiredListVar := vs.get(MetaRequired)
-	if requiredListVar == nil {
-		// No required variables
-		return nil
-	}
-
-	// Verify that the variable type is list
-	if !isVariableType(requiredListVar.v, config.VariableTypeList) {
-		return fmt.Errorf("Invalid type for meta_required_variables. \"%s\" != \"%s\"", 
-					config.VariableTypeList, 
-					requiredListVar.v.Type().Printable())
-	}
-
-	requiredList := requiredListVar.v.Default.([]interface{})
-	for _, v := range requiredList {
-		// variable names should only be strings
-		switch v.(type) {
-		case string:
-		default:
-			return fmt.Errorf("Invalid type for required variable name: '%T' != 'string'", v)
-		}
-
-		vname := v.(string)
-		if !vs.exists(vname) {
-			log.Warnf("Required variable '%s' not in module", vname)
-			continue
-		}
-
-		if err := askForValue(tf, vs, vname); err != nil {
-			return err
-		}
-	}
-
-	// Remove meta variable from variable map
-	vs.delete(MetaRequired)
-
-	return nil
-}
-
-func metaIgnoredHandler(tf *Tf, vs *variables) error {
-	ignoredListVar := vs.get(MetaIgnored)
-	if ignoredListVar == nil {
-		// No required variables
-		return nil
-	}
-
-	// Verify that the variable type is list
-	if !isVariableType(ignoredListVar.v, config.VariableTypeList) {
-		return fmt.Errorf("Invalid type for meta_required_variables. \"%s\" != \"%s\"", 
-					config.VariableTypeList, 
-					ignoredListVar.v.Type().Printable())
-	}
-
-	ignoredList := ignoredListVar.v.Default.([]interface{})
-	for _, v := range ignoredList {
-		// variable names should only be strings
-		switch v.(type) {
-		case string:
-		default:
-			return fmt.Errorf("Invalid type for ignored variable name: '%T' != 'string'", v)
-		}
-
-		vname := v.(string)
-		if !vs.exists(vname) {
-			log.Warnf("Ignored variable '%s' not in module", vname)
-			continue
-		}
-
-		vs.delete(vname)
-	}
-
-	vs.delete(MetaIgnored)
-
-	return nil
-}
-
 
 func isVariableType(v *config.Variable, t config.VariableType) bool {
 	return v.Type() == t

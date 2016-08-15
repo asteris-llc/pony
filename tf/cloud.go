@@ -50,7 +50,7 @@ func (tf *Tf) SelectCloud() error {
 
 func (tf *Tf) LoadCloud() error {
 	if _, ok := cloudList[tf.cloud]; !ok {
-		return fmt.Errorf("Cloud %s not in cloud list", tf.cloud)
+		return fmt.Errorf("Cloud '%s' not in cloud list", tf.cloud)
 	}
 
 	c, err := tf.loadInternal(cloudList[tf.cloud])

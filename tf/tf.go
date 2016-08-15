@@ -23,7 +23,7 @@ import (
 )
 
 const (
-	StatePath = "terraform.tfstate"
+	StatePath = "pony.state"
 )
 
 type Tf struct {
@@ -56,32 +56,6 @@ func New() *Tf {
 	return tf
 }
 
-func (tf *Tf) Run() error {
-	if err := tf.LoadCloud(); err != nil {
-		return err
-	}
-
-	if err := tf.ReadVariables(); err != nil {
-		return err
-	}
-
-	if err := tf.Context(); err != nil {
-		return err
-	}
-
-//	tf.dumpVariables(tf.tree)
-
-	if err := tf.Plan(); err != nil {
-		return err
-	}
-
-	if err := tf.Apply(); err != nil {
-		return err
-	}
-
-	return nil
-}
-
 func (tf *Tf) String() string {
 	rval := bytes.NewBufferString("Tf structure:\n")
 	rval.WriteString(fmt.Sprintf("  Cloud Provider: %s\n", tf.cloud))
@@ -95,7 +69,7 @@ func (tf *Tf) Clean() {
 	os.Remove(tf.tempDir)
 }
 
-func (tf *Tf) Context() error {
+func (tf *Tf) Context(destroy bool) error {
 	golog.SetOutput(ioutil.Discard)
 
 	providers, err := plugin.Providers()
@@ -109,11 +83,12 @@ func (tf *Tf) Context() error {
 	}
 
 	ctx, err := terraform.NewContext(&terraform.ContextOpts{
+		Destroy: destroy,
 		Hooks:	[]terraform.Hook{NewUiHook(&tfcli.BasicUi{Writer: os.Stdout})},
 		Module: tf.tree,
 		Providers: providers,
 		Provisioners: provisioners,
-		State: nil,
+		State: tf.state,
 	})
 	if err != nil {
 		return err
