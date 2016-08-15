@@ -1,12 +1,9 @@
 package tf
 
 import (
-	"bufio"
 	"bytes"
 	"fmt"
-	"strings"
 	"sync"
-	"unicode"
 
 	"github.com/hashicorp/terraform/terraform"
 	"github.com/mitchellh/cli"
@@ -77,10 +74,9 @@ func (h *UiHook) PreApply(
 		return terraform.HookActionContinue, nil
 	}
 
-
 	h.ui.Output(fmt.Sprintf(
 		"%s: %s",
-		getName(d, id),
+		id,
 		operation))
 
 	return terraform.HookActionContinue, nil
@@ -142,20 +138,20 @@ func (h *UiHook) ProvisionOutput(
 	n *terraform.InstanceInfo,
 	provId string,
 	msg string) {
-	id := n.HumanId()
-	var buf bytes.Buffer
+//	id := n.HumanId()
+//	var buf bytes.Buffer
 
-	prefix := fmt.Sprintf("%s (%s): ", id, provId)
-	s := bufio.NewScanner(strings.NewReader(msg))
-	s.Split(scanLines)
-	for s.Scan() {
-		line := strings.TrimRightFunc(s.Text(), unicode.IsSpace)
-		if line != "" {
-			buf.WriteString(fmt.Sprintf("%s%s\n", prefix, line))
-		}
-	}
-
-	h.ui.Output(strings.TrimSpace(buf.String()))
+//	prefix := fmt.Sprintf("%s (%s): ", id, provId)
+//	s := bufio.NewScanner(strings.NewReader(msg))
+//	s.Split(scanLines)
+//	for s.Scan() {
+//		line := strings.TrimRightFunc(s.Text(), unicode.IsSpace)
+//		if line != "" {
+//			buf.WriteString(fmt.Sprintf("%s%s\n", prefix, line))
+//		}
+//	}
+//
+//	h.ui.Output(strings.TrimSpace(buf.String()))
 }
 
 func (h *UiHook) PreRefresh(
