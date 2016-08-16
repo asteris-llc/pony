@@ -22,3 +22,7 @@ import:
   - ssh
 - package: github.com/aws/aws-sdk-go
   version: v1.2.7
+- package: github.com/armon/go-radix
+- package: github.com/bgentry/speakeasy
+- package: github.com/mattn/go-isatty
+

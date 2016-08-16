@@ -1,4 +1,4 @@
-TEST?=./...
+TEST?=$$(glide nv)
 NAME = $(shell awk -F\" '/^const Name/ { print $$2 }' main.go)
 VERSION = $(shell awk -F\" '/^const Version/ { print $$2 }' main.go)
 DEPS = $(shell go list -f '{{range .TestImports}}{{.}} {{end}}' ./...)
@@ -24,20 +24,18 @@ test:
 plugins: 
 	go build 
 
-xcompile: test
+xcompile:
 	@rm -rf build/
 	@mkdir -p build
 	gox \
 		-os="darwin" \
-		-os="dragonfly" \
-		-os="freebsd" \
-		-os="linux" \
-		-os="openbsd" \
-		-os="solaris" \
-		-os="windows" \
-		-output="build/pony_$(VERSION)_{{.OS}}_{{.Arch}}/pony-{{.Dir}}" ./...
+		-output="build/pony_$(VERSION)_{{.OS}}_{{.Arch}}/pony-{{.Dir}}" $$(glide nv)
 
-bin_package: xcompile 
+#		-os="freebsd" \
+#		-os="linux" \
+#		-os="windows" \
+
+package: xcompile 
 	$(eval FILES := $(shell ls build))
 	@mkdir -p build/tgz
 	for f in $(FILES); do \
