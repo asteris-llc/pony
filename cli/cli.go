@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"fmt"
 	"io"
 	"regexp"
 
@@ -58,4 +59,12 @@ func (c *Cli) AskYesNo(prompt, def string) bool {
 
 	m, err := regexp.MatchString("^[Yy][Ee]?[Ss]?$", result)
 	return m
+}
+
+func (c *Cli) Printf(format string, a ...interface{}) (int, error) {
+	return fmt.Fprintf(c.w, format, a...)
+}
+
+func (c *Cli) Println(a ...interface{}) (int, error) {
+	return fmt.Fprintln(c.w, a...)
 }

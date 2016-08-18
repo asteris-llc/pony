@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/hashicorp/terraform/config"
-
 	log "github.com/sirupsen/logrus"
 )
 
 var create_metaHandlers = []metaHandler{
+	create_metaProviderHandler,
 	create_metaRequiredHandler,
 	create_metaIgnoredHandler,
 	create_metaOptionalHandler,
@@ -76,30 +75,50 @@ func create_metaOptionalHandler(tf *Tf, vs *variables) error {
 	return nil
 }
 
-func create_metaRequiredHandler(tf *Tf, vs *variables) error {
-	requiredListVar := vs.get(MetaRequired)
-	if requiredListVar == nil {
-		// No required variables
+func create_metaProviderHandler(tf *Tf, vs *variables) error {
+	providerList, err := vs.getStringList(MetaProvider)
+	if err != nil {
+		return err
+	}
+
+	if providerList == nil {
 		return nil
 	}
 
-	// Verify that the variable type is list
-	if !isVariableType(requiredListVar.v, config.VariableTypeList) {
-		return fmt.Errorf("Invalid type for meta_required_variables. \"%s\" != \"%s\"", 
-					config.VariableTypeList, 
-					requiredListVar.v.Type().Printable())
+	providerVars, err := tf.cloudProvider.GetProviderVars()
+	if err != nil {
+		return err
 	}
 
-	requiredList := requiredListVar.v.Default.([]interface{})
-	for _, v := range requiredList {
-		// variable names should only be strings
-		switch v.(type) {
-		case string:
-		default:
-			return fmt.Errorf("Invalid type for required variable name: '%T' != 'string'", v)
+	for _, vname := range providerList {
+		pv := vs.get(vname)
+		if pv == nil {
+			return fmt.Errorf("Provider variable '%s' not defined in module", vname)
+			continue
 		}
+		if providerVar, ok := providerVars[vname]; ok {
+			pv.setValue(providerVar)
+		} else {
+			if err := askForValue(tf, vs, vname); err != nil {
+				return err
+			}
+		}
+	}
 
-		vname := v.(string)
+	return nil
+}
+
+func create_metaRequiredHandler(tf *Tf, vs *variables) error {
+	requiredList, err := vs.getStringList(MetaRequired)
+	if err != nil {
+		return err
+	}
+
+	if requiredList == nil {
+		return nil
+	}
+
+	for _, vname := range requiredList {
 		if !vs.exists(vname) {
 			log.Warnf("Required variable '%s' not in module", vname)
 			continue
@@ -117,29 +136,16 @@ func create_metaRequiredHandler(tf *Tf, vs *variables) error {
 }
 
 func create_metaIgnoredHandler(tf *Tf, vs *variables) error {
-	ignoredListVar := vs.get(MetaIgnored)
-	if ignoredListVar == nil {
-		// No required variables
+	ignoredList, err := vs.getStringList(MetaIgnored)
+	if err != nil {
+		return err
+	}
+
+	if ignoredList == nil {
 		return nil
 	}
 
-	// Verify that the variable type is list
-	if !isVariableType(ignoredListVar.v, config.VariableTypeList) {
-		return fmt.Errorf("Invalid type for meta_required_variables. \"%s\" != \"%s\"", 
-					config.VariableTypeList, 
-					ignoredListVar.v.Type().Printable())
-	}
-
-	ignoredList := ignoredListVar.v.Default.([]interface{})
-	for _, v := range ignoredList {
-		// variable names should only be strings
-		switch v.(type) {
-		case string:
-		default:
-			return fmt.Errorf("Invalid type for ignored variable name: '%T' != 'string'", v)
-		}
-
-		vname := v.(string)
+	for _, vname := range ignoredList {
 		if !vs.exists(vname) {
 			log.Warnf("Ignored variable '%s' not in module", vname)
 			continue

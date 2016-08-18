@@ -15,6 +15,7 @@ const (
 	MetaRequired = "meta_required_variables"
 	MetaIgnored = "meta_ignored_variables"
 	MetaDestroy = "meta_destroy_variables"
+	MetaProvider = "meta_provider_variables"
 
 	ModuleDescription = "description"
 )
@@ -144,8 +145,12 @@ func (tf *Tf) processChildren(root *module.Tree, mh []metaHandler) error {
 	return nil
 }
 
-func isVariableType(v *config.Variable, t config.VariableType) bool {
-	return v.Type() == t
+func (v *variable) isType(t config.VariableType) bool {
+	return v.v.Type() == t
+}
+
+func (v *variable) getType() string {
+	return v.v.Type().Printable()
 }
 
 func (v *variable) getDefault() string {
@@ -174,7 +179,7 @@ func askForValue(tf *Tf, vs *variables, name string) error {
 		return fmt.Errorf("Variable not in config: '%s'", name)
 	}
 
-	if !isVariableType(v.v, config.VariableTypeString) {
+	if !v.isType(config.VariableTypeString) {
 		return fmt.Errorf("Only %s variable types supported", config.VariableTypeString.Printable())
 	}
 
@@ -207,6 +212,32 @@ func (vs *variables) readVars(t *module.Tree) {
 			v: v,
 		})
 	}
+}
+
+func (vs *variables) getStringList(key string) ([]string, error) {
+	listVar := vs.get(key)
+	if listVar == nil {
+		return nil, nil
+	}
+
+	if !listVar.isType(config.VariableTypeList) {
+		return nil, fmt.Errorf("Invlid type for '%s'. '%s' != 'list'",
+			key,
+			listVar.getType(),
+			)
+	}
+
+	rval := make([]string, len(listVar.v.Default.([]interface{})))
+	for i, v := range listVar.v.Default.([]interface{}) {
+		switch v.(type) {
+		case string:
+			rval[i] = v.(string)
+		default:
+			return nil, fmt.Errorf("Invalid type for string list: '%T'", v)
+		}
+	}
+
+	return rval, nil
 }
 
 func (tf *Tf) dumpVariables(t *module.Tree) {

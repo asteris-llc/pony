@@ -8,52 +8,23 @@ import (
 	"github.com/hashicorp/terraform/config/module"
 )
 
-type cloudBase struct {
-	repo string
-	filename string
-}
-
-var cloudList = map[string]cloudBase{ 
-	"google": {
-		repo: "github.com/ChrisAubuchon/pony-config/gce/base",
-		filename: "gce.tf",
-	},
-}
-
-var cloudKeys []string
-
-func init() {
-	cloudKeys = make([]string, len(cloudList))
-	i := 0
-	for k := range cloudList { 
-		cloudKeys[i] = k
-		i++
-	}
-}
-
 func (tf *Tf) SelectCloud() error {
-	prompt := fmt.Sprintf("Select a cloud provider(%s)", strings.Join(cloudKeys, ","))
+	prompt := fmt.Sprintf("Select a cloud provider(%s)", strings.Join(tf.cloudList.Keys(), ","))
 	for {
 		rsp, err := tf.cli.AskRequired(prompt)
 		if err != nil {
 			return err
 		}
 
-		for c, _ := range cloudList {
-			if rsp == c {
-				tf.cloud = c
-				return nil
-			}
+		if found := tf.cloudList.GetProvider(rsp); found != nil {
+			tf.cloudProvider = found
+			return nil
 		}
 	}
 }
 
 func (tf *Tf) LoadCloud() error {
-	if _, ok := cloudList[tf.cloud]; !ok {
-		return fmt.Errorf("Cloud '%s' not in cloud list", tf.cloud)
-	}
-
-	c, err := tf.loadInternal(cloudList[tf.cloud])
+	c, err := tf.loadInternal()
 	if err != nil {
 		return err
 	}

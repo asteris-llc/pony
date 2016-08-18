@@ -13,6 +13,7 @@ import (
 
 	"github.com/asteris-llc/pony/cli"
 	"github.com/asteris-llc/pony/tf/plugin"
+	"github.com/asteris-llc/pony/tf/cloud"
 
 	"github.com/hashicorp/terraform/config/module"
 	"github.com/hashicorp/terraform/terraform"
@@ -30,10 +31,11 @@ type Tf struct {
 	context	*terraform.Context
 	tree	*module.Tree
 	cli	*cli.Cli
-	cloud	string
 	tempDir string
         globals *variables
 	state	*terraform.State
+	cloudList	*cloud.CloudList
+	cloudProvider	cloud.CloudProvider
 }
 
 func New() *Tf {
@@ -52,13 +54,13 @@ func New() *Tf {
 	tf.tempDir = tdir
 
 	tf.globals = newVariables()
+	tf.cloudList = cloud.New(tf.cli)
 
 	return tf
 }
 
 func (tf *Tf) String() string {
 	rval := bytes.NewBufferString("Tf structure:\n")
-	rval.WriteString(fmt.Sprintf("  Cloud Provider: %s\n", tf.cloud))
 
 	return rval.String()
 }

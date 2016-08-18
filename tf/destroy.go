@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/hashicorp/terraform/config"
 	"github.com/hashicorp/terraform/terraform"
 
 	log "github.com/sirupsen/logrus"
@@ -40,7 +39,16 @@ func (tf *Tf) Destroy(statePath string) error {
 		// Verify that the cloud output is a string
 		switch cloudVar.Value.(type) {
 		case string:
-			tf.cloud = root.Outputs["cloud"].Value.(string)
+			cloudName := root.Outputs["cloud"].Value.(string)
+			if cp := tf.cloudList.GetProvider(cloudName); cp != nil {
+				tf.cloudProvider = cp
+				break
+			}
+
+			// Unknown cloud. Ask
+			if err := tf.SelectCloud(); err != nil {
+				return err
+			}
 		default:
 			if err := tf.SelectCloud(); err != nil {
 				return err
@@ -74,27 +82,19 @@ func (tf *Tf) Destroy(statePath string) error {
 }
 
 func destroy_metaDestroyHandler(tf *Tf, vs *variables) error {
-	destroyListVar := vs.get(MetaDestroy)
-	if destroyListVar == nil {
+	destroyList, err := vs.getStringList(MetaDestroy)
+	if err != nil {
+		return err
+	}
+
+	if destroyList == nil {
 		fmt.Println("Nothing to do")
 		return nil
 	}
 
 	root := tf.state.RootModule()
 
-	if !isVariableType(destroyListVar.v, config.VariableTypeList) {
-		return fmt.Errorf("Invalid type for meta_destroy_variables")
-	}
-
-	destroyList := destroyListVar.v.Default.([]interface{})
-	for _, v := range destroyList {
-		switch v.(type) {
-		case string:
-		default:
-                        return fmt.Errorf("Invalid type for required variable name: '%T' != 'string'", v)
-                }
-
-                vname := v.(string)
+	for _, vname := range destroyList {
                 if !vs.exists(vname) {
                         log.Warnf("Required variable '%s' not in module", vname)
                         continue

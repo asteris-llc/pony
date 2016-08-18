@@ -8,12 +8,12 @@ import (
 	"github.com/hashicorp/terraform/config"
 )
 
-func (tf *Tf) loadInternal(cb cloudBase) (*config.Config, error) {
-	if err := getter.Get(tf.tempDir, cb.repo); err != nil {
+func (tf *Tf) loadInternal() (*config.Config, error) {
+	if err := getter.Get(tf.tempDir, tf.cloudProvider.Repo()); err != nil {
 		return nil, err
 	}
 
-	path := filepath.Join(tf.tempDir, cb.filename)
+	path := filepath.Join(tf.tempDir, tf.cloudProvider.Base())
 
 	c, err := config.LoadFile(path)
 	if err != nil {

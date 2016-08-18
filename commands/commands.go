@@ -22,6 +22,7 @@ func Init() *Command {
 		Short: "Easy installer for mantl",
 		Long: "Easy installer for mantl",
 		SilenceUsage: true,
+		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			c.configureLogging()
 
