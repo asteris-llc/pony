@@ -1,4 +1,4 @@
-package cloud 
+package cloud
 
 import (
 	"sort"
@@ -15,7 +15,7 @@ type CloudProvider interface {
 }
 
 type CloudList struct {
-	keys []string
+	keys      []string
 	providers map[string]CloudProvider
 }
 

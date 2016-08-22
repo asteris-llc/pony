@@ -13,9 +13,9 @@ import (
 )
 
 var InternalProviders = map[string]plugin.ProviderFunc{
-	"aws": awsprovider.Provider,
-	"google": googleprovider.Provider,
-	"null": nullprovider.Provider,
+	"aws":      awsprovider.Provider,
+	"google":   googleprovider.Provider,
+	"null":     nullprovider.Provider,
 	"template": templateprovider.Provider,
 }
 

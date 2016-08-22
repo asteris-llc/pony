@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"os/exec"
 
+	"github.com/hashicorp/go-plugin"
 	tfplugin "github.com/hashicorp/terraform/plugin"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/hashicorp/go-plugin"
 	"github.com/mitchellh/osext"
 	"github.com/spf13/cobra"
 )
@@ -20,9 +20,9 @@ func InitPluginCmd(root *cobra.Command) {
 	p := Plugin{}
 
 	pluginCmd := &cobra.Command{
-		Use: "plugin",
-		Short: "Run terraform plugin",
-		Long: "Run terraform plugin",
+		Use:    "plugin",
+		Short:  "Run terraform plugin",
+		Long:   "Run terraform plugin",
 		Hidden: true,
 		PreRunE: func(cmd *cobra.Command, args []string) error {
 			if p.Name == "" {
@@ -103,7 +103,7 @@ func providerFactory(path string, exepath string) terraform.ResourceProviderFact
 	c.HandshakeConfig = tfplugin.Handshake
 	c.Managed = true
 	c.Plugins = map[string]plugin.Plugin{
-		"provider": &tfplugin.ResourceProviderPlugin{},
+		"provider":    &tfplugin.ResourceProviderPlugin{},
 		"provisioner": &tfplugin.ResourceProvisionerPlugin{},
 	}
 	client := plugin.NewClient(&c)
@@ -129,7 +129,7 @@ func provisionerFactory(path string, exepath string) terraform.ResourceProvision
 	c.Managed = true
 	c.HandshakeConfig = tfplugin.Handshake
 	c.Plugins = map[string]plugin.Plugin{
-		"provider": &tfplugin.ResourceProviderPlugin{},
+		"provider":    &tfplugin.ResourceProviderPlugin{},
 		"provisioner": &tfplugin.ResourceProvisionerPlugin{},
 	}
 	client := plugin.NewClient(&c)

@@ -1,8 +1,8 @@
 package tf
 
 import (
-	"path/filepath"
 	"os"
+	"path/filepath"
 
 	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/terraform/config"

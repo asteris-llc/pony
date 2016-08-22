@@ -37,7 +37,7 @@ func (c *Cli) Select(varName string, list []string) (string, error) {
 			continue
 		}
 
-		return list[rval-1],nil
+		return list[rval-1], nil
 	}
 }
 
@@ -75,13 +75,17 @@ func (c *Cli) SelectMany(varName string, list []string) ([]string, error) {
 		// String conversion errors are caught by the checkIsNumeric check
 		rval, _ := strconv.Atoi(result)
 
-		if rval == (count+1) {
+		if rval == (count + 1) {
 			rlist := []string{}
 			for i, isSelected := range selected {
 				if isSelected {
 					rlist = append(rlist, list[i])
 				}
 			}
+			if len(rlist) <= 0 {
+				continue
+			}
+
 			return rlist, nil
 		}
 
@@ -92,4 +96,3 @@ func (c *Cli) SelectMany(varName string, list []string) ([]string, error) {
 		selected[rval-1] = !selected[rval-1]
 	}
 }
-

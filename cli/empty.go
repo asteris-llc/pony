@@ -17,7 +17,7 @@ func checkNotEmpty(input string) error {
 	return nil
 }
 
-type EmptyError struct {}
+type EmptyError struct{}
 
 func (e *EmptyError) Error() string { return "" }
 

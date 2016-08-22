@@ -3,7 +3,7 @@ package tf
 import (
 	"bytes"
 	"fmt"
-//	"regexp"
+	//	"regexp"
 
 	"github.com/hashicorp/terraform/config"
 	"github.com/hashicorp/terraform/config/module"
@@ -11,10 +11,10 @@ import (
 )
 
 const (
-	_ = iota
+	_            = iota
 	MetaRequired = "meta_required_variables"
-	MetaIgnored = "meta_ignored_variables"
-	MetaDestroy = "meta_destroy_variables"
+	MetaIgnored  = "meta_ignored_variables"
+	MetaDestroy  = "meta_destroy_variables"
 	MetaProvider = "meta_provider_variables"
 
 	ModuleDescription = "description"
@@ -25,8 +25,8 @@ type metaHandler func(*Tf, *variables) error
 type variables map[string]*variable
 
 type variable struct {
-	name	string
-	v	*config.Variable
+	name string
+	v    *config.Variable
 }
 
 func newVariables() *variables {
@@ -71,14 +71,12 @@ func (tf *Tf) ReadVariables(mh []metaHandler) error {
 	//
 	tf.globals.readVars(tf.tree)
 
-
 	if err := tf.processChildren(tf.tree, mh); err != nil {
 		return err
 	}
 
 	return nil
 }
-
 
 func (tf *Tf) processModule(tree *module.Tree, vs *variables, mh []metaHandler, header string) error {
 	if header != "" {
@@ -122,11 +120,10 @@ func (tf *Tf) processChildren(root *module.Tree, mh []metaHandler) error {
 
 			if t := vs.get(k); t != nil {
 				t.setValue(v)
-					
+
 			}
 		}
 		tf.processModule(child, vs, mh, desc)
-
 
 		// The RawConfig variables override the module variable's Default
 		// value. We overwrite the Raw variables with whatever value the
@@ -209,7 +206,7 @@ func (vs *variables) readVars(t *module.Tree) {
 		}
 		vs.set(v.Name, &variable{
 			name: v.Name,
-			v: v,
+			v:    v,
 		})
 	}
 }
@@ -224,7 +221,7 @@ func (vs *variables) getStringList(key string) ([]string, error) {
 		return nil, fmt.Errorf("Invlid type for '%s'. '%s' != 'list'",
 			key,
 			listVar.getType(),
-			)
+		)
 	}
 
 	rval := make([]string, len(listVar.v.Default.([]interface{})))

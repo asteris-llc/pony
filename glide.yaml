@@ -8,7 +8,7 @@ import:
   version: 3d184cea22ee1c41ec1697e0d830ff0c78f7ea97
 - package: github.com/masterzen/winrm
   version: 54ea5d01478cfc2afccec1504bd0dfcd8c260cfa
-- package: github.com/hashicorp/terraform
+- package: github.com/hashicorp/terraform/terraform
   version: v0.7.0
 - package: github.com/hashicorp/hil
   version: 1e86c6b523c55d1fa6c6e930ce80b548664c95c2

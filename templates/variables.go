@@ -7,10 +7,10 @@ import (
 )
 
 type Variable struct {
-	Name string
-	Short string
-	Long string
-	Default string
+	Name     string
+	Short    string
+	Long     string
+	Default  string
 	Optional bool
 }
 type Variables map[string]*Variable
@@ -164,13 +164,11 @@ func (t *Template) varVariableFunc() func(s string) (interface{}, error) {
 			return nil, fmt.Errorf("Multiple uses of `variable %s`", s)
 		}
 
-
 		(*t.vars)[s] = &Variable{
-			Name: s,
+			Name:     s,
 			Optional: false,
 		}
 
 		return s, nil
 	}
 }
-

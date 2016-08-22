@@ -10,6 +10,5 @@ const Version = "0.0.0"
 func main() {
 	root := commands.Init()
 	root.Execute()
-		
-}
 
+}

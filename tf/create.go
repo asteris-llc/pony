@@ -27,7 +27,7 @@ func (tf *Tf) Create() error {
 		return err
 	}
 
-//	tf.dumpVariables(tf.tree)
+	//	tf.dumpVariables(tf.tree)
 
 	if err := tf.Plan(); err != nil {
 		return err
@@ -158,4 +158,3 @@ func create_metaIgnoredHandler(tf *Tf, vs *variables) error {
 
 	return nil
 }
-

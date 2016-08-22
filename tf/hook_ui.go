@@ -38,7 +38,7 @@ func NewUiHook(ui cli.Ui) *UiHook {
 func getName(d *terraform.InstanceDiff, id string) string {
 	if rname, ok := d.Attributes["name"]; ok {
 		return rname.New
-	} 
+	}
 
 	return id
 }
@@ -138,20 +138,20 @@ func (h *UiHook) ProvisionOutput(
 	n *terraform.InstanceInfo,
 	provId string,
 	msg string) {
-//	id := n.HumanId()
-//	var buf bytes.Buffer
+	//	id := n.HumanId()
+	//	var buf bytes.Buffer
 
-//	prefix := fmt.Sprintf("%s (%s): ", id, provId)
-//	s := bufio.NewScanner(strings.NewReader(msg))
-//	s.Split(scanLines)
-//	for s.Scan() {
-//		line := strings.TrimRightFunc(s.Text(), unicode.IsSpace)
-//		if line != "" {
-//			buf.WriteString(fmt.Sprintf("%s%s\n", prefix, line))
-//		}
-//	}
-//
-//	h.ui.Output(strings.TrimSpace(buf.String()))
+	//	prefix := fmt.Sprintf("%s (%s): ", id, provId)
+	//	s := bufio.NewScanner(strings.NewReader(msg))
+	//	s.Split(scanLines)
+	//	for s.Scan() {
+	//		line := strings.TrimRightFunc(s.Text(), unicode.IsSpace)
+	//		if line != "" {
+	//			buf.WriteString(fmt.Sprintf("%s%s\n", prefix, line))
+	//		}
+	//	}
+	//
+	//	h.ui.Output(strings.TrimSpace(buf.String()))
 }
 
 func (h *UiHook) PreRefresh(

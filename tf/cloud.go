@@ -40,4 +40,3 @@ func (tf *Tf) LoadCloud() error {
 
 	return nil
 }
-

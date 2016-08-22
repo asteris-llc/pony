@@ -8,10 +8,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-
 func TestAskRequired_emptyLines(t *testing.T) {
-	cases := []struct{
-		Input string
+	cases := []struct {
+		Input    string
 		Expected string
 	}{
 		{
@@ -43,9 +42,9 @@ func TestAskRequired_emptyLines(t *testing.T) {
 }
 
 func Test_AskRequiredWithDefault(t *testing.T) {
-	cases := []struct{
-		Input string
-		Default string
+	cases := []struct {
+		Input    string
+		Default  string
 		Expected string
 	}{
 		{
@@ -75,19 +74,19 @@ func Test_AskRequiredWithDefault(t *testing.T) {
 }
 
 func Test_AskYesNo(t *testing.T) {
-	cases := []struct{
-		Input string
+	cases := []struct {
+		Input    string
 		Expected bool
-		Default string
+		Default  string
 	}{
-		{ "yes\n", true, "n" },
-		{ "y\n", true, "n" }, 
-		{ "yE\n", true, "n" },
-		{ "YES\n", true, "n" },
-		{ "Yesterday\n", false, "n" },
-		{ "Anything else\n", false, "n" },
+		{"yes\n", true, "n"},
+		{"y\n", true, "n"},
+		{"yE\n", true, "n"},
+		{"YES\n", true, "n"},
+		{"Yesterday\n", false, "n"},
+		{"Anything else\n", false, "n"},
 		// Default value test
-		{ "\n", true, "y" },
+		{"\n", true, "y"},
 	}
 
 	assert := assert.New(t)

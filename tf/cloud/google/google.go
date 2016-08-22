@@ -16,17 +16,17 @@ import (
 )
 
 type Google struct {
-	cli *cli.Cli
-	client *http.Client
+	cli                  *cli.Cli
+	client               *http.Client
 	cloudResourceManager *cloudresourcemanager.Service
-	compute *compute.Service
+	compute              *compute.Service
 }
 
 type accountFile struct {
 	PrivateKeyId string `json:"private_key_id"`
-	PrivateKey string `json:"private_key"`
-	ClientEmail string `json:"client_email"`
-	ClientId string `json:"client_id"`
+	PrivateKey   string `json:"private_key"`
+	ClientEmail  string `json:"client_email"`
+	ClientId     string `json:"client_id"`
 }
 
 func New(cli *cli.Cli) *Google {
@@ -107,9 +107,9 @@ func (g *Google) readCredentials(path string) error {
 
 	// Authenticate with credentials
 	conf := jwt.Config{
-		Email: af.ClientEmail,
+		Email:      af.ClientEmail,
 		PrivateKey: []byte(af.PrivateKey),
-		Scopes: clientScopes,
+		Scopes:     clientScopes,
 		TokenURL:   "https://accounts.google.com/o/oauth2/token",
 	}
 	g.client = conf.Client(oauth2.NoContext)
@@ -121,4 +121,3 @@ func (g *Google) readCredentials(path string) error {
 
 	return nil
 }
-

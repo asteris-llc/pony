@@ -95,10 +95,10 @@ func destroy_metaDestroyHandler(tf *Tf, vs *variables) error {
 	root := tf.state.RootModule()
 
 	for _, vname := range destroyList {
-                if !vs.exists(vname) {
-                        log.Warnf("Required variable '%s' not in module", vname)
-                        continue
-                }
+		if !vs.exists(vname) {
+			log.Warnf("Required variable '%s' not in module", vname)
+			continue
+		}
 
 		if outputVar, ok := root.Outputs[vname]; ok {
 			// Only strings allowed
@@ -109,13 +109,11 @@ func destroy_metaDestroyHandler(tf *Tf, vs *variables) error {
 			dvar := vs.get(vname)
 			dvar.setValue(outputVar.Value.(string))
 		}
-		
-		
 
-                if err := askForValue(tf, vs, vname); err != nil {
-                        return err
-                }
-        }
+		if err := askForValue(tf, vs, vname); err != nil {
+			return err
+		}
+	}
 
 	vs.delete(MetaDestroy)
 

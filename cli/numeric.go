@@ -12,7 +12,7 @@ func checkIsNumeric(input string) error {
 	return nil
 }
 
-type NumericError struct {}
+type NumericError struct{}
 
 func (e *NumericError) Error() string { return "" }
 

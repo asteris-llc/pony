@@ -8,7 +8,6 @@ import (
 
 func (g *Google) getProject() (string, error) {
 	// Read project list
-	projects := make(map[string]string)
 	projects, err := g.readProjects()
 	if err != nil {
 		// Reading project list failed. Ask for response
@@ -23,29 +22,18 @@ func (g *Google) getProject() (string, error) {
 			}
 			g.cli.Printf("Invalid project name: %s\n", rsp)
 		}
-	} 
-	
-	// We have a list of projects. Have the user select one
-	g.cli.Println("\nAvailable projects")
-	g.cli.Println("------------------")
-	for _, p := range projects  {
-		g.cli.Println(p)
 	}
-	for {
-		rsp, err := g.cli.AskRequired("Enter a value for project")
-		if err != nil {
-			return "", err
-		}
 
-		// Project is in list
-		if _, ok := projects[rsp]; ok {
-			return rsp, nil
-		}
+	rsp, err := g.cli.Select("project", projects)
+	if err != nil {
+		return "", err
 	}
+
+	return rsp, nil
 }
 
-func (g *Google) readProjects() (map[string]string, error) {
-	rval := make(map[string]string)
+func (g *Google) readProjects() ([]string, error) {
+	rval := []string{}
 
 	crm, err := cloudresourcemanager.New(g.client)
 	if err != nil {
@@ -53,9 +41,9 @@ func (g *Google) readProjects() (map[string]string, error) {
 	}
 
 	call := crm.Projects.List()
-	if err := call.Pages(oauth2.NoContext, func (page *cloudresourcemanager.ListProjectsResponse) error {
+	if err := call.Pages(oauth2.NoContext, func(page *cloudresourcemanager.ListProjectsResponse) error {
 		for _, v := range page.Projects {
-			rval[v.ProjectId] = v.ProjectId
+			rval = append(rval, v.ProjectId)
 		}
 
 		return nil

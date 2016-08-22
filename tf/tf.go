@@ -12,15 +12,14 @@ import (
 	"strings"
 
 	"github.com/asteris-llc/pony/cli"
-	"github.com/asteris-llc/pony/tf/plugin"
 	"github.com/asteris-llc/pony/tf/cloud"
+	"github.com/asteris-llc/pony/tf/plugin"
 
 	"github.com/hashicorp/terraform/config/module"
 	"github.com/hashicorp/terraform/terraform"
 	tfcli "github.com/mitchellh/cli"
 
 	log "github.com/sirupsen/logrus"
-
 )
 
 const (
@@ -28,14 +27,14 @@ const (
 )
 
 type Tf struct {
-	context	*terraform.Context
-	tree	*module.Tree
-	cli	*cli.Cli
-	tempDir string
-        globals *variables
-	state	*terraform.State
-	cloudList	*cloud.CloudList
-	cloudProvider	cloud.CloudProvider
+	context       *terraform.Context
+	tree          *module.Tree
+	cli           *cli.Cli
+	tempDir       string
+	globals       *variables
+	state         *terraform.State
+	cloudList     *cloud.CloudList
+	cloudProvider cloud.CloudProvider
 }
 
 func New() *Tf {
@@ -85,12 +84,12 @@ func (tf *Tf) Context(destroy bool) error {
 	}
 
 	ctx, err := terraform.NewContext(&terraform.ContextOpts{
-		Destroy: destroy,
-		Hooks:	[]terraform.Hook{NewUiHook(&tfcli.BasicUi{Writer: os.Stdout})},
-		Module: tf.tree,
-		Providers: providers,
+		Destroy:      destroy,
+		Hooks:        []terraform.Hook{NewUiHook(&tfcli.BasicUi{Writer: os.Stdout})},
+		Module:       tf.tree,
+		Providers:    providers,
 		Provisioners: provisioners,
-		State: tf.state,
+		State:        tf.state,
 	})
 	if err != nil {
 		return err
@@ -118,18 +117,18 @@ func (tf *Tf) Apply() error {
 	var s *terraform.State
 	var applyErr error
 
-        doneCh := make(chan struct{})
-        ShutdownCh := make(chan struct{})
-        go func() {
-                defer close(doneCh)
-                s, applyErr = tf.context.Apply()
-        }()
+	doneCh := make(chan struct{})
+	ShutdownCh := make(chan struct{})
+	go func() {
+		defer close(doneCh)
+		s, applyErr = tf.context.Apply()
+	}()
 
-        select {
-        case <-ShutdownCh:
-                go tf.context.Stop()
-        case <-doneCh:
-        }
+	select {
+	case <-ShutdownCh:
+		go tf.context.Stop()
+	case <-doneCh:
+	}
 
 	tf.state = s
 
@@ -137,7 +136,7 @@ func (tf *Tf) Apply() error {
 		return err
 	}
 
-        return applyErr
+	return applyErr
 }
 
 func (tf *Tf) writeState() error {
@@ -161,49 +160,49 @@ func (tf *Tf) writeState() error {
 }
 
 func (tf *Tf) formatPlan(p *terraform.Plan) {
-        created := []string{}
-        destroyed := []string{}
-        updated := []string{}
+	created := []string{}
+	destroyed := []string{}
+	updated := []string{}
 
-        for _, m := range p.Diff.Modules {
-                for r, _ := range m.Resources {
-                        name := extractResource(r)
-                        switch m.ChangeType() {
-                        case terraform.DiffCreate:
-                                created = append(created, name)
-                        case terraform.DiffDestroy:
-                                destroyed = append(destroyed, name)
-                        case terraform.DiffUpdate:
-                                updated = append(updated, name)
-                        }
-                }
-        }
+	for _, m := range p.Diff.Modules {
+		for r, _ := range m.Resources {
+			name := extractResource(r)
+			switch m.ChangeType() {
+			case terraform.DiffCreate:
+				created = append(created, name)
+			case terraform.DiffDestroy:
+				destroyed = append(destroyed, name)
+			case terraform.DiffUpdate:
+				updated = append(updated, name)
+			}
+		}
+	}
 
-        fmt.Println("Resources Created:")
-        outputResources(created)
+	fmt.Println("Resources Created:")
+	outputResources(created)
 
-        fmt.Println("\nResources Destroyed:")
-        outputResources(destroyed)
+	fmt.Println("\nResources Destroyed:")
+	outputResources(destroyed)
 
-        fmt.Println("\nResources Updated:")
-        outputResources(updated)
+	fmt.Println("\nResources Updated:")
+	outputResources(updated)
 
-        fmt.Printf("\n%+v\n", p)
+	fmt.Printf("\n%+v\n", p)
 }
 
 func outputResources(s []string) {
-        if len(s) == 0 {
-                fmt.Println("  <none>")
-        } else {
-                sort.Strings(s)
-                for _, r := range s {
-                        fmt.Printf("  %s\n", r)
-                }
-        }
+	if len(s) == 0 {
+		fmt.Println("  <none>")
+	} else {
+		sort.Strings(s)
+		for _, r := range s {
+			fmt.Printf("  %s\n", r)
+		}
+	}
 }
 
 func extractResource(r string) string {
-        fields := strings.Split(r, ".")
+	fields := strings.Split(r, ".")
 
-        return fields[len(fields)-1]
+	return fields[len(fields)-1]
 }

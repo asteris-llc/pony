@@ -10,10 +10,10 @@ func (c *Command) addDestroySub() {
 	var stateFile string
 
 	dCmd := &cobra.Command{
-		Use: "destroy",
+		Use:   "destroy",
 		Short: "Destroy infrastructure",
-		Long: "Destroy infrastructure",
-		RunE: func (cmd *cobra.Command, args []string) error {
+		Long:  "Destroy infrastructure",
+		RunE: func(cmd *cobra.Command, args []string) error {
 			return c.tf.Destroy(stateFile)
 		},
 	}
@@ -21,4 +21,4 @@ func (c *Command) addDestroySub() {
 	dCmd.Flags().StringVarP(&stateFile, "state", "s", tf.StatePath, "Path to environment state")
 
 	c.root.AddCommand(dCmd)
-}	
+}

@@ -4,13 +4,13 @@ import (
 	"github.com/asteris-llc/pony/tf"
 	"github.com/asteris-llc/pony/tf/plugin"
 
-	"github.com/spf13/cobra"
 	log "github.com/sirupsen/logrus"
+	"github.com/spf13/cobra"
 )
 
 type Command struct {
-	root *cobra.Command
-	tf *tf.Tf
+	root     *cobra.Command
+	tf       *tf.Tf
 	logLevel string
 }
 
@@ -18,10 +18,10 @@ func Init() *Command {
 	c := Command{}
 
 	c.root = &cobra.Command{
-		Use: "pony",
-		Short: "Easy installer for mantl",
-		Long: "Easy installer for mantl",
-		SilenceUsage: true,
+		Use:           "pony",
+		Short:         "Easy installer for mantl",
+		Long:          "Easy installer for mantl",
+		SilenceUsage:  true,
 		SilenceErrors: true,
 		PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
 			c.configureLogging()
@@ -55,11 +55,10 @@ func (c *Command) Execute() {
 
 func (c *Command) configureLogging() {
 	l, err := log.ParseLevel(c.logLevel)
-        if err != nil {
-                log.SetLevel(log.WarnLevel)
-                log.Warnf("Invalid log level '%v'. Setting to WARN", c.logLevel)
-        } else {
-                log.SetLevel(l)
-        }
+	if err != nil {
+		log.SetLevel(log.WarnLevel)
+		log.Warnf("Invalid log level '%v'. Setting to WARN", c.logLevel)
+	} else {
+		log.SetLevel(l)
+	}
 }
-

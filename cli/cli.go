@@ -9,10 +9,10 @@ import (
 )
 
 type Cli struct {
-	r	io.Reader
-	w	io.Writer
+	r io.Reader
+	w io.Writer
 
-	a	interact.Actor
+	a interact.Actor
 }
 
 func New(r io.Reader, w io.Writer) *Cli {
@@ -52,7 +52,7 @@ func (c *Cli) AskRequiredWithDefault(prompt, def string) (string, error) {
 }
 
 func (c *Cli) AskYesNo(prompt, def string) bool {
-	result, err := c.a.PromptOptional(prompt, def, )
+	result, err := c.a.PromptOptional(prompt, def)
 	if err != nil {
 		return false
 	}
