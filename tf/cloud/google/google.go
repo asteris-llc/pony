@@ -29,18 +29,27 @@ type accountFile struct {
 	ClientId     string `json:"client_id"`
 }
 
+var internalModules = map[string]string{
+	"network": network_module,
+	"instance": instance_module,
+}
+
 func New(cli *cli.Cli) *Google {
 	return &Google{
 		cli: cli,
 	}
 }
 
-func (g *Google) Repo() string {
-	return "github.com/ChrisAubuchon/pony-config/gce/base"
+func (g *Google) Root() []byte {
+	return []byte(root_module)
 }
 
-func (g *Google) Base() string {
-	return "gce.tf"
+func (g *Google) GetConfig(mod string) ([]byte, error) {
+	if mdata, ok := internalModules[mod]; !ok {
+		return nil, fmt.Errorf("Invalid internal module: %s", mod)
+	} else {
+		return []byte(mdata), nil
+	}
 }
 
 func (g *Google) GetProviderVars() (map[string]string, error) {

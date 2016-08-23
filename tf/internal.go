@@ -2,20 +2,12 @@ package tf
 
 import (
 	"os"
-	"path/filepath"
 
-	"github.com/hashicorp/go-getter"
 	"github.com/hashicorp/terraform/config"
 )
 
 func (tf *Tf) loadInternal() (*config.Config, error) {
-	if err := getter.Get(tf.tempDir, tf.cloudProvider.Repo()); err != nil {
-		return nil, err
-	}
-
-	path := filepath.Join(tf.tempDir, tf.cloudProvider.Base())
-
-	c, err := config.LoadFile(path)
+	c, err := config.LoadJSON(tf.cloudProvider.Root())
 	if err != nil {
 		return nil, err
 	}

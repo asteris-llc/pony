@@ -17,6 +17,7 @@ import (
 
 	"github.com/hashicorp/terraform/config/module"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/go-getter"
 	tfcli "github.com/mitchellh/cli"
 
 	log "github.com/sirupsen/logrus"
@@ -54,6 +55,8 @@ func New() *Tf {
 
 	tf.globals = newVariables()
 	tf.cloudList = cloud.New(tf.cli)
+
+	getter.Getters["builtin"] = tf
 
 	return tf
 }

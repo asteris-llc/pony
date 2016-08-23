@@ -9,9 +9,9 @@ import (
 )
 
 type CloudProvider interface {
-	Repo() string
-	Base() string
+	Root() []byte
 	GetProviderVars() (map[string]string, error)
+	GetConfig(string) ([]byte, error)
 }
 
 type CloudList struct {

@@ -1,5 +1,5 @@
-hash: 6935686459e58f0e26493ea13e9365d948d2d941fd43035e28993f01bef30a6d
-updated: 2016-08-15T15:49:35.151805154-05:00
+hash: 643d68aa0b69c32a88da27adc63480d11e224389bf12981a6d32f7fdbbdc0360
+updated: 2016-08-22T10:55:53.398272495-05:00
 imports:
 - name: cloud.google.com/go
   version: 7e055554bce38b3c9a6e8b97a9c2f1a2c47ab845
@@ -135,9 +135,10 @@ imports:
 - name: github.com/hashicorp/terraform
   version: e822a79165dbc06bbf8271ee349fe256867d53dc
   subpackages:
+  - terraform
   - config
   - config/module
-  - terraform
+  - helper/pathorcontents
   - builtin/providers/aws
   - builtin/providers/google
   - builtin/providers/null
@@ -153,7 +154,6 @@ imports:
   - helper/mutexkv
   - helper/resource
   - helper/schema
-  - helper/pathorcontents
   - communicator
   - communicator/remote
   - helper/config
@@ -232,10 +232,10 @@ imports:
 - name: golang.org/x/oauth2
   version: 4784bb855e56a530f1ce5d788959359ed6cb4a16
   subpackages:
-  - google
   - jwt
   - internal
   - jws
+  - google
 - name: golang.org/x/sys
   version: a646d33e2ee3172a661fc09bca23bb4889a41bc8
   subpackages:
@@ -243,14 +243,15 @@ imports:
 - name: google.golang.org/api
   version: 8ae9b02432fd8417fb9359af58f473036b094d20
   subpackages:
+  - cloudresourcemanager/v1beta1
   - compute/v1
+  - gensupport
+  - googleapi
   - container/v1
   - dns/v1
-  - googleapi
   - pubsub/v1
   - sqladmin/v1beta4
   - storage/v1
-  - gensupport
   - googleapi/internal/uritemplates
 - name: google.golang.org/appengine
   version: e951d3868b377b14f4e60efa3a301532ee3c1ebf
@@ -258,10 +259,10 @@ imports:
   - urlfetch
   - internal
   - internal/urlfetch
-  - internal/app_identity
-  - internal/modules
   - internal/base
   - internal/datastore
   - internal/log
   - internal/remote_api
+  - internal/app_identity
+  - internal/modules
 devImports: []
